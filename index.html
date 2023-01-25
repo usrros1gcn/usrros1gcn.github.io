@@ -19,10 +19,20 @@
         var port = $("input#input_port").val();
         var token = $("input#input_token").val();
         var b64token = btoa('riot:'+token);
-        console.log(b64token);
-      }
-      function sendMessage(message){
-        return ;
+        $.ajax({
+          url: "https://127.0.0.1:"+port+"/chat/v5/participants/champ-select/",
+          type: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Basic "+b64token
+          },
+          success: function(result){
+            console.log(result);
+          },
+          error: function(result){
+            console.log(result);
+          }
+        });
       }
     </script>
     <title>League Revealer | 롤 익명 제거기</title>
