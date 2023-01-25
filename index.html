@@ -15,34 +15,21 @@
       gtag('config', 'G-M5L42P5GSK');
     </script>
     <script>
-      function makeRequest(username,password, port){
-          var imgUrl = "https://" + username + ":" + password + "@127.0.0.1:"+port+"/chat/v5/participants/champ-select/";
-          var scriptUrl = "https://127.0.0.1:"+port+"/chat/v5/participants/champ-select/?callback=myCallBack";
-
-          // Attach image to cache auth
-          var img = $('<img />').attr( "src", imgUrl );
-          $('body').append(img);
-          img.remove();
-
-          // Let the image load, then do the jsonp request
-          setTimeout(function(){
-            var sc1 = '<script type="text/javascript"></';
-            var sc2 = 'script>'
-              var scriptToAdd = $(sc1+sc2);
-              scriptToAdd.attr('src',scriptUrl);
-              $('body').append(scriptToAdd);
-          },1000);
-      }
-    
-    function myCallBack(res){
-    console.log( "response=",response );
-    }
-      
       function check(){
         var port = $("input#input_port").val();
         var token = $("input#input_token").val();
         var b64token = btoa('riot:'+token);
-        makeRequest(riot, token, port);
+        $.ajaxPrefilter('json', function(options, orig, jqXHR) {
+          return 'jsonp'
+        });
+        $.ajax({
+          type: "GET",
+          crossDomain: true,
+          url: "https://127.0.0.1:"+port+"/chat/v5/participants/champ-select/",
+          dataType: "json",
+          success: function (res) { console.log(res); },
+          error: function (res) {console.log(res); } 
+        });
       }
     </script>
     <title>League Revealer | 롤 익명 제거기</title>
@@ -90,7 +77,8 @@
       <div>
          Windows: CMD에 하단의 명령어 입력<br>
          wmic PROCESS WHERE name='LeagueClientUx.exe' GET commandline<br>
-        <b>--riotclient-app-port=</b>와 <b>--riotclient-auth-token=</b> 값 복사해서 아래 붙여넣기.
+        <b>--riotclient-app-port=</b>와 <b>--riotclient-auth-token=</b> 값 복사해두기.<br>
+        인증 창 뜨면 ID: riot, PW: Auth-token 입력하기.
       </div>
       <div>
         <label for="input_port">app-port: </label><input type="textbox" id="input_port"/><br>
