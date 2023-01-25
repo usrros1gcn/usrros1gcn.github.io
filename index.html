@@ -16,7 +16,7 @@
     </script>
     <script>
       $.ajaxPrefilter('json', function(options, orig, jqXHR) {
-          if (options.crossDomain && !$.support.cors) return 'jsonp'
+          return 'jsonp'
       });
       function check(){
         var port = $("input#input_port").val();
