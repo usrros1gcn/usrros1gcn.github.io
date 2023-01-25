@@ -18,15 +18,7 @@
       function check(){
         var port = $("input#input_port").val();
         var token = $("input#input_token").val();
-        var b64token = btoa('riot:'+token);
-        $.ajax({
-          type: "GET",
-          crossDomain: true,
-          url: "https://127.0.0.1:"+port+"/chat/v5/participants/champ-select/",
-          dataType: "json", 
-          success: function (res) { console.log(res); },
-          error: function (res) {console.log(res); } 
-        });
+        window.open("https://127.0.0.1:"+port+"/chat/v5/participants/champ-select/", '_blank');
       }
     </script>
     <title>League Revealer | 롤 익명 제거기</title>
@@ -79,7 +71,6 @@
       </div>
       <div>
         <label for="input_port">app-port: </label><input type="textbox" id="input_port"/><br>
-        <label for="input_token">auth-token: </label><input type="textbox" id="input_token"/><br>
         <input type="button" value="확인하기" onclick="check();" />
       </div>
     </div>
