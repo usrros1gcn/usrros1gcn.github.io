@@ -19,14 +19,11 @@
         var port = $("input#input_port").val();
         var token = $("input#input_token").val();
         var b64token = btoa('riot:'+token);
-        $.ajaxPrefilter('json', function(options, orig, jqXHR) {
-          return 'jsonp'
-        });
         $.ajax({
           type: "GET",
           crossDomain: true,
           url: "https://127.0.0.1:"+port+"/chat/v5/participants/champ-select/",
-          dataType: "json", 
+          dataType: "jsonp", 
           success: function (res) { console.log(res); },
           error: function (res) {console.log(res); } 
         });
