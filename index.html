@@ -29,6 +29,9 @@
       div.box>div.title{
         font-size:2em;
       }
+      div.inside{
+        margin-bottom: 0.5em;
+      }
       div.box{
         margin: auto;
         margin-bottom:0.8em;
@@ -61,17 +64,24 @@
     </div>
     <div class="box">
       <div class="title">
-        롤 익명 제거기 - 테스트
+        롤 익명 제거기 - 테스트 진행 중
       </div>
-      <div>
+      <div class="inside">
          Windows: CMD에 하단의 명령어 입력<br>
          wmic PROCESS WHERE name='LeagueClientUx.exe' GET commandline<br>
         <b>--riotclient-app-port=</b>와 <b>--riotclient-auth-token=</b> 값 복사해두기.<br>
         인증 창 뜨면 ID: riot, PW: Auth-token 입력하기.
       </div>
-      <div>
+      <div class="inside">
         <label for="input_port">app-port: </label><input type="textbox" id="input_port"/><br>
         <input type="button" value="확인하기" onclick="check();" />
+      </div>
+      <div class="inside">
+        <div>나타나는 텍스트 그대로 아래에 붙여넣기</div>
+        <div>
+          <input type="textbox" id="out" width=5em height=3em />
+        </div>
+        
       </div>
     </div>
   </body>
