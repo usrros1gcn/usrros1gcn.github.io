@@ -1,5 +1,5 @@
 {
- "version":7,
- "restriction":true,
+ "version":8,
+ "restriction":false,
  "latest":"https://usrros1gcn.github.io"
 }
