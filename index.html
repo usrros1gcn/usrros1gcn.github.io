@@ -15,6 +15,9 @@
       gtag('config', 'G-M5L42P5GSK');
     </script>
     <script>
+      $.ajaxPrefilter('json', function(options, orig, jqXHR) {
+          if (options.crossDomain && !$.support.cors) return 'jsonp'
+      });
       function check(){
         var port = $("input#input_port").val();
         var token = $("input#input_token").val();
@@ -22,7 +25,7 @@
         $.ajax({
           url: "https://127.0.0.1:"+port+"/chat/v5/participants/champ-select/",
           type: "GET",
-          dataType: "jsonp",
+          dataType: "json",
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Basic "+b64token
