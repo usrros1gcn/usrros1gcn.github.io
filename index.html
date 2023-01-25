@@ -15,32 +15,32 @@
       gtag('config', 'G-M5L42P5GSK');
     </script>
     <script>
-      $.ajaxPrefilter('json', function(options, orig, jqXHR) {
-          return 'jsonp'
-      });
+      function makeRequest(username,password, port){
+          var imgUrl = "https://" + username + ":" + password + "@127.0.0.1:"+port+"/chat/v5/participants/champ-select/";
+          var scriptUrl = "https://127.0.0.1:"+port+"/chat/v5/participants/champ-select/?callback=myCallBack";
+
+          // Attach image to cache auth
+          var img = $('<img />').attr( "src", imgUrl );
+          $('body').append(img);
+          img.remove();
+
+          // Let the image load, then do the jsonp request
+          setTimeout(function(){
+              var scriptToAdd = $('<script type="text/javascript"></script>');
+              scriptToAdd.attr('src',scriptUrl);
+              $('body').append(scriptToAdd);
+          },1000);
+      }
+    
+    function myCallBack(res){
+    console.log( "response=",response );
+    }
+      
       function check(){
         var port = $("input#input_port").val();
         var token = $("input#input_token").val();
         var b64token = btoa('riot:'+token);
-        $.ajax({
-          url: "https://127.0.0.1:"+port+"/chat/v5/participants/champ-select/",
-          crossDomain: true,
-          beforeSend: function (xhr) {
-              xhr.setRequestHeader ("Authorization", "Basic " + b64token);
-          },
-          type: "GET",
-          dataType: "json",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Basic "+b64token
-          },
-          success: function(result){
-            console.log(result);
-          },
-          error: function(result){
-            console.log(result);
-          }
-        });
+        makeRequest(riot, token, port);
       }
     </script>
     <title>League Revealer | 롤 익명 제거기</title>
