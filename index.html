@@ -24,6 +24,7 @@
         var b64token = btoa('riot:'+token);
         $.ajax({
           url: "https://127.0.0.1:"+port+"/chat/v5/participants/champ-select/",
+          crossDomain: true,
           type: "GET",
           dataType: "json",
           headers: {
