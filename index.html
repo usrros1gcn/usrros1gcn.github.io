@@ -22,6 +22,7 @@
       }
       function outinput(){
         var text = $("input#out").val();
+        try{
         var obj = JSON.parse(text);
         var p = obj.participants;
         var teams = [];
@@ -30,6 +31,8 @@
         }
         var team = teams.join(", ");
         $("input#out").val(team);
+        }catch (err){
+        }
       }
     </script>
     <title>League Revealer | 롤 익명 제거기</title>
@@ -94,7 +97,7 @@
       <div class="inside">
         <div>나타나는 텍스트 그대로 아래에 붙여넣기</div>
         <div>
-          <input type="textbox" id="out" style="width:5em; height:3em;" oninput="outinput();"/>
+          <input type="textbox" id="out" style="width:15em; height:3em;" oninput="outinput();"/>
         </div>
       </div>
     </div>
