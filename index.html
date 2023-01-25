@@ -20,6 +20,17 @@
         var token = $("input#input_token").val();
         window.open("https://127.0.0.1:"+port+"/chat/v5/participants/champ-select/", '_blank');
       }
+      function outinput(){
+        var text = $("input#out").val();
+        var obj = JSON.parse(text);
+        var p = obj.participants;
+        var teams = [];
+        for(var i of p){
+          teams.push(i.name);
+        }
+        var team = teams.join(", ");
+        $("input#out").val(team);
+      }
     </script>
     <title>League Revealer | 롤 익명 제거기</title>
     <style>
@@ -83,7 +94,7 @@
       <div class="inside">
         <div>나타나는 텍스트 그대로 아래에 붙여넣기</div>
         <div>
-          <input type="textbox" id="out" style="width:5em; height:3em;" />
+          <input type="textbox" id="out" style="width:5em; height:3em;" oninput="outinput();"/>
         </div>
       </div>
     </div>
