@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-M5L42P5GSK"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -14,6 +15,12 @@
       gtag('config', 'G-M5L42P5GSK');
     </script>
     <script>
+      function check(){
+        var port = $("input#input_port").val();
+        var token = $("input#input_token").val();
+        var b64token = btoa('riot:'+token);
+        console.log(b64token);
+      }
       function sendMessage(message){
         return ;
       }
