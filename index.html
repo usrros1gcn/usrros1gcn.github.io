@@ -13,6 +13,11 @@
 
       gtag('config', 'G-M5L42P5GSK');
     </script>
+    <script>
+      function sendMessage(message){
+        return ;
+      }
+    </script>
     <title>League Revealer | 롤 익명 제거기</title>
     <style>
       a{
@@ -53,14 +58,18 @@
     </div>
     <div class="box">
       <div class="title">
-        Simple Dodger | 원버튼 닷지
+        롤 익명 제거기 - 테스트
       </div>
-       <div class="link">
-         <a href="https://www.mediafire.com/file/kbckmbqfbfb6dl9/SimpleDodge.exe/file">Latest Download</a>  
-       </div>
-       <div class="link">
-         <a href="https://www.virustotal.com/gui/file/00cc285d4eedb27f6869f5371493918b361fd2c17fa5c37a32a330fe43614b64">VirusTotal</a>  
-       </div>
+      <div>
+         Windows: CMD에 하단의 명령어 입력<br>
+         wmic PROCESS WHERE name='LeagueClientUx.exe' GET commandline / wmic PROCESS WHERE name='RiotClientUx.exe' GET commandline<br>
+        <b>--riotclient-app-port=</b>와 <b>--riotclient-auth-token=</b> 값 복사해서 아래 붙여넣기.
+      </div>
+      <div>
+        <label for="input_port">app-port: </label><input type="textbox" id="input_port"/><br>
+        <label for="input_token">auth-token: </label><input type="textbox" id="input_token"/><br>
+        <input type="button" value="확인하기" onclick="check();" />
+      </div>
     </div>
   </body>
 </html>
