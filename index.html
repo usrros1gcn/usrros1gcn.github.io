@@ -22,6 +22,7 @@
         $.ajax({
           url: "https://127.0.0.1:"+port+"/chat/v5/participants/champ-select/",
           type: "GET",
+          dataType: "jsonp",
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Basic "+b64token
