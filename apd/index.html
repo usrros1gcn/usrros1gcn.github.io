@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>SC2 Bank Editor - Batch Aura Setup</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f5f6FA; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { font-size: 1.5em; border-bottom: 2px solid #2d3436; padding-bottom: 10px; margin-top: 0; }
+        .form-group { margin-bottom: 15px; display: flex; align-items: center; }
+        label { display: inline-block; width: 180px; font-weight: bold; }
+        input[type="number"], select { padding: 6px; width: 212px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+        input[readonly] { background-color: #e9ecef; color: #495057; cursor: not-allowed; font-weight: bold; }
+        .oora-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .oora-item { border: 1px solid #e0e0e0; padding: 10px; border-radius: 4px; background: #fdfdfd; }
+        .oora-item span { display: block; font-weight: bold; margin-bottom: 8px; color: #0984e3; font-size: 0.95em; }
+        .radio-group { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.9em; }
+        .radio-group label { width: auto; font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 3px; margin: 0; }
+        .btn { width: 100%; padding: 15px; background: #0984e3; color: white; border: none; font-size: 1.2em; font-weight: bold; cursor: pointer; margin-top: 20px; border-radius: 4px; }
+        .btn:hover { background: #074b83; }
+        .btn-small { padding: 6px 12px; background: #2d3436; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-small:hover { background: #636e72; }
+        .btn-verify { padding: 6px 12px; background: #e17055; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px; font-weight: bold; }
+        .btn-verify:hover { background: #d63031; }
+        textarea { width: 100%; height: 250px; margin-top: 20px; padding: 10px; font-family: 'Consolas', monospace; border: 1px solid #ccc; resize: vertical; box-sizing: border-box; background: #f4f4f4; }
+        .note { font-size: 0.85em; color: #e17055; margin-left: 10px; }
+        .upload-section { margin-bottom: 20px; padding: 15px; background: #e8f4fd; border-radius: 4px; border: 1px dashed #0984e3; }
+        .upload-section h3 { margin-top: 0; font-size: 1.1em; color: #0984e3; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>SC2 무결성 우회 뱅크 에디터 v15 (오라 일괄 조작 세분화)</h2>
+        
+        <div class="upload-section">
+            <h3>기존 .SC2Bank 파일 불러오기</h3>
+            <input type="file" id="bankUpload" accept=".SC2Bank">
+            <p class="note" style="margin-left: 0; margin-top: 8px;">※ 파일을 업로드하면 원본의 [항목 순서, 줄바꿈, 띄어쓰기 탭] 형식을 100% 동일하게 보존하여 출력합니다.</p>
+        </div>
+
+        <div class="form-group">
+            <label>Player Handle ID</label>
+            <input type="number" id="handleId" placeholder="예: 1234567" required>
+            <button type="button" class="btn-verify" onclick="verifyHandleId()">ID 검증</button>
+        </div>
+        <div class="form-group">
+            <label>잔존 오라 포인트</label>
+            <input type="number" id="currentPoints" value="0">
+        </div>
+        <div class="form-group">
+            <label>누적 뽑기 횟수 (po)</label>
+            <input type="number" id="po" value="0" readonly>
+            <span class="note">※ 오라 등급 총합으로 자동 계산</span>
+        </div>
+        <div class="form-group">
+            <label>누적 획득 포인트</label>
+            <input type="number" id="totalPoints" value="0" readonly>
+            <span class="note">※ 잔존 포인트 + (뽑기 횟수 × 100) 자동 계산</span>
+        </div>
+        
+        <details class="form-group" style="display: block;">
+            <summary style="cursor: pointer; font-weight: bold; color: #d63031; margin-bottom: 10px;">고급 설정 (테두리, 아이콘, 슬롯 - 클릭 시 확장)</summary>
+            <div style="background: #ffeaa7; padding: 15px; border-radius: 4px; display: grid; gap: 10px;">
+                <div>
+                    <label style="width: 150px;">Tier (테두리)</label>
+                    <select id="tier">
+                        <option value="0">기본</option>
+                        <option value="1" disabled hidden>미사용 (1)</option>
+                        <option value="2">노말 클리어</option>
+                        <option value="3">하드 클리어</option>
+                        <option value="4">챌린지 클리어</option>
+                        <option value="5" selected>인페르넘 클리어</option>
+                        <option value="6" disabled hidden>더미 (6)</option>
+                        <option value="7">엔드 클리어</option>
+                    </select>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <label style="width: 150px;">Icon (아이콘)</label>
+                    <select id="iconSelect" onchange="document.getElementById('icon').value = this.value;" style="width: 140px;">
+                        <option value="31" selected>31: 두둘기</option>
+                        <option value="32">32: 디바</option>
+                    </select>
+                    <input type="number" id="icon" value="31" style="display: none; width: 125px;">
+                    <button type="button" id="toggleIconBtn" class="btn-small" onclick="toggleIconMode()">수동 입력</button>
+                </div>
+                <div><label style="width: 150px;">Ora1 장착 슬롯</label><input type="number" id="ora1" value="31"></div>
+                <div><label style="width: 150px;">Ora2 장착 슬롯</label><input type="number" id="ora2" value="62"></div>
+                <div><label style="width: 150px;">Ora3 장착 슬롯</label><input type="number" id="ora3" value="55"></div>
+            </div>
+        </details>
+
+        <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <h3 style="margin-top: 0; margin-bottom: 0; font-size: 1.1em; margin-right: 10px;">오라 일괄 조작</h3>
+            <button type="button" class="btn-small" onclick="setAllOoras(0)">0: 무획득</button>
+            <button type="button" class="btn-small" onclick="setAllOoras(1)">1: 브론즈</button>
+            <button type="button" class="btn-small" onclick="setAllOoras(2)">2: 실버</button>
+            <button type="button" class="btn-small" onclick="setAllOoras(3)">3: 골드</button>
+            <button type="button" class="btn-small" onclick="setAllOoras(4)">4: 프리즘</button>
+            <button type="button" class="btn-small" onclick="setAllOoras(5)">5: 초월</button>
+        </div>
+
+        <div class="oora-grid" id="ooraGrid"></div>
+
+        <button class="btn" onclick="generateXML()">XML 뱅크 파일 생성 및 다운로드</button>
+
+        <textarea id="output" placeholder="생성된 XML 데이터가 이곳에 출력됩니다." readonly></textarea>
+    </div>
+
+    <script>
+        const auraNames = [
+            "진짜 함대", "깊은 뿌리", "내가 이 구역의 쪼신", "품질 향상", "누구보다 빠르고 정확하게",
+            "주는 대로 가는 사람", "압도 그잡채", "주사 맞으면 다 나아", "부식", "마법 회랑",
+            "광신도", "구조 붕괴", "누가 네 친구야?", "마스코트 등장", "포커가 잘떠야..",
+            "현상금 사냥꾼", "정밀 분석 완료", "모두 힘내봐요!", "고립", "과일이 그렇게 좋아?",
+            "암시장", "계시록", "엄마가 하룻밤 자고 나면 올게", "응급 지원", "낡아빠진 공장",
+            "입영 통지서", "지방방패", "수호진영", "풍부한 미네랄", "동화 작용",
+            "부자의 삶이란", "리롤!리롤!리롤!", "무한 동력", "개복치", "아니 왜 나만 안떠!",
+            "무료 식권", "황금 기물", "붉은 왕관", "치타는 웃고 있다", "미래 예지",
+            "네 일은 네가 알아서 해", "혹한기", "따뜻한 부화기", "키리의 강화기", "정기 구독",
+            "맘마 메가", "한 수 위", "특이점", "눈부신 기교", "혹시 로또 당첨됐어?",
+            "소규모 팀", "우정의 힘", "적응형 타격", "사교육", "엄마가 모아놨다가 돌려줄게",
+            "건물주", "고양's", "쳤냐?", "우리도 일합니다", "우리들의 우상",
+            "나만 빼고 레벨업", "공리주의", "애기 예비군", "보물사냥꾼", "전력의 힘",
+            "내일 봐", "심장을 지켜요", "방지턱이 많네 ㅋ", "따뜻한 느낌", "희망의 감마 빔",
+            "앗뜨거!", "색안경", "영원한 짝꿍", "비밀 친구", "산 제물",
+            "느긋하게 갑시다", "신나는 여름밤", "고혹적인 루비", "공격 또 공격", "방사 원소 잔류",
+            "모든걸 담아서", "진동 전기톱", "일어나라", "고급 쪼꼬미", "우주의 격노",
+            "공이 그렇게 좋아?", "쌍둥이 자매", "상호 파괴 보장", "드디어 올것이 왔군", "어바웃 타임"
+        ];
+
+        const grid = document.getElementById('ooraGrid');
+        const tiers = ['없음', '브론즈', '실버', '골드', '프리즘', '초월'];
+        
+        let gridHtml = '';
+        for (let i = 1; i <= 90; i++) {
+            gridHtml += '<div class="oora-item"><span>' + i.toString().padStart(2, '0') + '. ' + auraNames[i-1] + '</span><div class="radio-group">';
+            for (let j = 0; j <= 5; j++) {
+                const checked = (j === 0) ? 'checked' : '';
+                gridHtml += '<label><input type="radio" name="oora' + i + '" value="' + j + '" ' + checked + ' onchange="updateCalculations()"> ' + tiers[j] + '</label>';
+            }
+            gridHtml += '</div></div>';
+        }
+        grid.innerHTML = gridHtml;
+
+        document.getElementById('currentPoints').addEventListener('input', updateCalculations);
+
+        function toggleIconMode() {
+            const sel = document.getElementById('iconSelect');
+            const inp = document.getElementById('icon');
+            const btn = document.getElementById('toggleIconBtn');
+
+            if (inp.style.display === 'none') {
+                sel.style.display = 'none';
+                inp.style.display = 'inline-block';
+                btn.innerText = '목록 선택';
+            } else {
+                sel.style.display = 'inline-block';
+                inp.style.display = 'none';
+                btn.innerText = '수동 입력';
+                
+                if (inp.value == '31' || inp.value == '32') {
+                    sel.value = inp.value;
+                } else {
+                    inp.value = sel.value; 
+                }
+            }
+        }
+
+        let loadedXmlDoc = null;
+        let loadedHU = null; 
+        let originalFileName = "MyBank.SC2Bank";
+
+        document.getElementById('bankUpload').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            originalFileName = file.name;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const xmlText = e.target.result;
+                const parser = new DOMParser();
+                loadedXmlDoc = parser.parseFromString(xmlText, "text/xml");
+
+                function getIntValue(sectionName, keyName) {
+                    const section = loadedXmlDoc.querySelector('Section[name="' + sectionName + '"]');
+                    if (section) {
+                        const key = section.querySelector('Key[name="' + keyName + '"]');
+                        if (key) {
+                            const val = key.querySelector('Value');
+                            if (val) return parseInt(val.getAttribute('int'));
+                        }
+                    }
+                    return null;
+                }
+
+                const currentPoints = getIntValue("Point", "current");
+                if (currentPoints !== null) document.getElementById('currentPoints').value = currentPoints;
+
+                const tier = getIntValue("tier", "number");
+                if (tier !== null) {
+                    document.getElementById('tier').value = tier;
+                }
+                
+                const iconVal = getIntValue("icon", "number");
+                if (iconVal !== null) {
+                    document.getElementById('icon').value = iconVal;
+                    const sel = document.getElementById('iconSelect');
+                    const btn = document.getElementById('toggleIconBtn');
+                    
+                    if (iconVal == 31 || iconVal == 32) {
+                        sel.value = iconVal;
+                        sel.style.display = 'inline-block';
+                        document.getElementById('icon').style.display = 'none';
+                        btn.innerText = '수동 입력';
+                    } else {
+                        sel.style.display = 'none';
+                        document.getElementById('icon').style.display = 'inline-block';
+                        btn.innerText = '목록 선택';
+                    }
+                }
+                
+                const ora1 = getIntValue("Ora1", "number");
+                if (ora1 !== null) document.getElementById('ora1').value = ora1;
+                
+                const ora2 = getIntValue("Ora2", "number");
+                if (ora2 !== null) document.getElementById('ora2').value = ora2;
+                
+                const ora3 = getIntValue("Ora3", "number");
+                if (ora3 !== null) document.getElementById('ora3').value = ora3;
+
+                for (let i = 1; i <= 90; i++) {
+                    const ooraVal = getIntValue("OOra" + i, "number");
+                    if (ooraVal !== null && ooraVal >= 0 && ooraVal <= 5) {
+                        const el = document.querySelector('input[name="oora' + i + '"][value="' + ooraVal + '"]');
+                        if (el) el.checked = true;
+                    }
+                }
+
+                const huVal = getIntValue("HU", "number");
+                if (huVal !== null) {
+                    loadedHU = huVal;
+                }
+
+                updateCalculations();
+                alert('뱅크 파일 데이터 로드 완료!\nPlayer Handle ID를 입력하고 [ID 검증]을 진행하세요.');
+            };
+            reader.readAsText(file);
+        });
+
+        function updateCalculations() {
+            let poSum = 0;
+            for (let i = 1; i <= 90; i++) {
+                const el = document.querySelector('input[name="oora' + i + '"]:checked');
+                if (el) {
+                    poSum += parseInt(el.value);
+                }
+            }
+            
+            const currentPoints = parseInt(document.getElementById('currentPoints').value) || 0;
+            const totalPoints = currentPoints + (poSum * 100);
+
+            document.getElementById('po').value = poSum;
+            document.getElementById('totalPoints').value = totalPoints;
+        }
+
+        function setAllOoras(val) {
+            for (let i = 1; i <= 90; i++) {
+                const el = document.querySelector('input[name="oora' + i + '"][value="' + val + '"]');
+                if(el) el.checked = true;
+            }
+            updateCalculations();
+        }
+
+        function calculateHash(tier, pointTotal, pointCurrent, icon, po, huEvent, ora1, ora2, ora3, oOraArray, playerHandle) {
+            let hash = BigInt(0);
+            hash += BigInt(tier) * 51n;
+            hash += BigInt(pointTotal) * 131n;
+            hash += BigInt(pointCurrent) * 513n;
+            hash += BigInt(icon) * 19n;
+            hash += BigInt(po) * 33n;
+            hash += BigInt(huEvent) * 57n;
+            hash += BigInt(ora1) * 311n;
+            hash += BigInt(ora2) * 41553n;
+            hash += BigInt(ora3) * 7n;
+
+            for (let i = 0; i < 90; i++) {
+                hash = ((hash * 7n) + BigInt(oOraArray[i])) % 9991n;
+            }
+
+            hash += BigInt(playerHandle) * 159n;
+            hash = (hash + 8281n) % 5551n;
+            return Number(hash);
+        }
+
+        function verifyHandleId() {
+            if (loadedHU === null) {
+                alert("먼저 기존 .SC2Bank 파일을 업로드하여 원본 데이터를 로드해야 합니다.");
+                return;
+            }
+
+            const handleId = parseInt(document.getElementById('handleId').value);
+            if (isNaN(handleId)) {
+                alert("Player Handle ID를 숫자로 정확히 입력하세요.");
+                return;
+            }
+
+            updateCalculations();
+
+            const currentPoints = parseInt(document.getElementById('currentPoints').value) || 0;
+            const totalPoints = parseInt(document.getElementById('totalPoints').value) || 0;
+            const po = parseInt(document.getElementById('po').value) || 0;
+            
+            const tier = parseInt(document.getElementById('tier').value) || 0;
+            const icon = parseInt(document.getElementById('icon').value) || 0;
+            const ora1 = parseInt(document.getElementById('ora1').value) || 0;
+            const ora2 = parseInt(document.getElementById('ora2').value) || 0;
+            const ora3 = parseInt(document.getElementById('ora3').value) || 0;
+
+            const oOraArray = [];
+            for (let i = 1; i <= 90; i++) {
+                const el = document.querySelector('input[name="oora' + i + '"]:checked');
+                oOraArray.push(el ? parseInt(el.value) : 0);
+            }
+
+            const calcHU = calculateHash(tier, totalPoints, currentPoints, icon, po, 0, ora1, ora2, ora3, oOraArray, handleId);
+
+            if (calcHU === loadedHU) {
+                alert("검증 성공! 올바른 Player ID입니다.\n계산된 해시: " + calcHU + "\n원본 해시: " + loadedHU);
+            } else {
+                alert("검증 실패.\n입력된 ID가 틀렸거나, 뱅크 파일 업로드 후 수치가 변경되었습니다.\n\n계산된 해시: " + calcHU + "\n원본 해시: " + loadedHU);
+            }
+        }
+
+        function getBaseXmlDoc() {
+            if (loadedXmlDoc) return loadedXmlDoc;
+            
+            const parser = new DOMParser();
+            let defaultXml = '<?xml version="1.0" encoding="utf-8"?><Bank version="1">';
+            defaultXml += '<Section name="po"><Key name="po"><Value int="0"/></Key></Section>';
+            defaultXml += '<Section name="Point"><Key name="total"><Value int="0"/></Key><Key name="current"><Value int="0"/></Key></Section>';
+            defaultXml += '<Section name="tier"><Key name="number"><Value int="0"/></Key></Section>';
+            defaultXml += '<Section name="icon"><Key name="number"><Value int="31"/></Key></Section>';
+            defaultXml += '<Section name="Ora1"><Key name="number"><Value int="0"/></Key></Section>';
+            defaultXml += '<Section name="Ora2"><Key name="number"><Value int="0"/></Key></Section>';
+            defaultXml += '<Section name="Ora3"><Key name="number"><Value int="0"/></Key></Section>';
+            for(let i=1; i<=90; i++) {
+                defaultXml += '<Section name="OOra' + i + '"><Key name="number"><Value int="0"/></Key></Section>';
+            }
+            defaultXml += '<Section name="HU"><Key name="event"><Value int="0"/></Key><Key name="number"><Value int="0"/></Key></Section>';
+            defaultXml += '<Section name="KLX"><Key name="Boo1"><Value int="1"/></Key><Key name="Boo3"><Value int="1"/></Key><Key name="Boo2"><Value int="1"/></Key><Key name="Boo4"><Value int="0"/></Key><Key name="Boo7"><Value int="0"/></Key></Section>';
+            defaultXml += '<Section name="ULO"><Key name="N003O"><Value int="0"/></Key></Section>';
+            defaultXml += '<Section name="MUTE"><Key name="Sound"><Value int="51"/></Key></Section>';
+            defaultXml += '<Section name="Upi"><Key name="V"><Value int="51"/></Key></Section>';
+            defaultXml += '<Section name="TemSy"><Key name="V"><Value int="2"/></Key></Section>';
+            defaultXml += '</Bank>';
+            return parser.parseFromString(defaultXml, "text/xml");
+        }
+
+        function setXmlValue(xmlDoc, sectionName, keyName, value) {
+            let section = xmlDoc.querySelector('Section[name="' + sectionName + '"]');
+            if (!section) {
+                section = xmlDoc.createElement("Section");
+                section.setAttribute("name", sectionName);
+                xmlDoc.documentElement.appendChild(section);
+            }
+            let key = section.querySelector('Key[name="' + keyName + '"]');
+            if (!key) {
+                key = xmlDoc.createElement("Key");
+                key.setAttribute("name", keyName);
+                section.appendChild(key);
+            }
+            let valEl = key.querySelector("Value");
+            if (!valEl) {
+                valEl = xmlDoc.createElement("Value");
+                key.appendChild(valEl);
+            }
+            valEl.setAttribute("int", value.toString());
+        }
+
+        function serializeSC2Bank(xmlDoc) {
+            let xml = '<?xml version="1.0" encoding="utf-8"?>\n<Bank version="1">\n';
+            
+            const sections = Array.from(xmlDoc.documentElement.children);
+            for (const section of sections) {
+                if (section.tagName !== "Section") continue;
+                const secName = section.getAttribute("name");
+                xml += '    <Section name="' + secName + '">\n';
+                
+                const keys = Array.from(section.children);
+                for (const key of keys) {
+                    if (key.tagName !== "Key") continue;
+                    const keyName = key.getAttribute("name");
+                    xml += '        <Key name="' + keyName + '">\n';
+                    
+                    const vals = Array.from(key.children);
+                    for (const val of vals) {
+                        if (val.tagName !== "Value") continue;
+                        const valInt = val.getAttribute("int");
+                        xml += '            <Value int="' + valInt + '"/>\n';
+                    }
+                    
+                    xml += '        </Key>\n';
+                }
+                xml += '    </Section>\n';
+            }
+            xml += '</Bank>';
+            return xml;
+        }
+
+        function generateXML() {
+            const handleId = parseInt(document.getElementById('handleId').value);
+            if (isNaN(handleId)) {
+                alert('Player Handle ID를 정확히 입력하세요.');
+                return;
+            }
+
+            updateCalculations();
+
+            const currentPoints = parseInt(document.getElementById('currentPoints').value) || 0;
+            const totalPoints = parseInt(document.getElementById('totalPoints').value) || 0;
+            const po = parseInt(document.getElementById('po').value) || 0;
+            
+            const tier = parseInt(document.getElementById('tier').value) || 0;
+            const icon = parseInt(document.getElementById('icon').value) || 0;
+            const ora1 = parseInt(document.getElementById('ora1').value) || 0;
+            const ora2 = parseInt(document.getElementById('ora2').value) || 0;
+            const ora3 = parseInt(document.getElementById('ora3').value) || 0;
+
+            const oOraArray = [];
+            for (let i = 1; i <= 90; i++) {
+                const el = document.querySelector('input[name="oora' + i + '"]:checked');
+                oOraArray.push(el ? parseInt(el.value) : 0);
+            }
+
+            const hash = calculateHash(tier, totalPoints, currentPoints, icon, po, 0, ora1, ora2, ora3, oOraArray, handleId);
+
+            const xmlDoc = getBaseXmlDoc();
+
+            setXmlValue(xmlDoc, "po", "po", po);
+            setXmlValue(xmlDoc, "Point", "total", totalPoints);
+            setXmlValue(xmlDoc, "Point", "current", currentPoints);
+            setXmlValue(xmlDoc, "tier", "number", tier);
+            setXmlValue(xmlDoc, "icon", "number", icon);
+            setXmlValue(xmlDoc, "Ora1", "number", ora1);
+            setXmlValue(xmlDoc, "Ora2", "number", ora2);
+            setXmlValue(xmlDoc, "Ora3", "number", ora3);
+            
+            for (let i = 0; i < 90; i++) {
+                setXmlValue(xmlDoc, "OOra" + (i+1), "number", oOraArray[i]);
+            }
+            
+            setXmlValue(xmlDoc, "HU", "number", hash);
+
+            const xmlOutput = serializeSC2Bank(xmlDoc);
+
+            document.getElementById('output').value = xmlOutput;
+
+            const blob = new Blob([xmlOutput], { type: 'text/xml;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            const downloadName = (originalFileName && originalFileName !== "MyBank.SC2Bank") ? originalFileName : handleId + ".SC2Bank";
+            link.setAttribute("download", downloadName);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        updateCalculations();
+    </script>
+</body>
+</html>
